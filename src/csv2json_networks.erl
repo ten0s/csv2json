@@ -9,24 +9,24 @@
 -endif.
 
 -record(prefix, {
-    network_id                      :: {string, string()},
-    prefix                          :: {string, string()}
+    network_id                     :: {string, string()},
+    prefix                         :: {string, string()}
 }).
 
 -record(network, {
-    '_id'                           :: {string, string()},
-    name                            :: {string, string()},
-    country                         :: {string, string()},
-    hex_code                        :: {string, string()},
-    country_code                    :: {string, string()},
-    number_len                      :: {integer, integer()},
-    prefixes = {array, []}          :: {array, [{string, string()}]},
-    gmt_diff                        :: {string, string()},
-    dst                             :: {string, string()},
-    provider_id                     :: {string, string()},
-    is_home                         :: {boolean, boolean()},
-    sms_points                      :: {float, float()},
-    sms_mult_points = {float, 1.0}  :: {float, float()}
+    '_id'                          :: {string, string()},
+    name                           :: {string, string()},
+    country                        :: {string, string()},
+    hex_code                       :: {string, string()},
+    country_code                   :: {string, string()},
+    number_len                     :: {integer, integer()},
+    prefixes = {array, []}         :: {array, [{string, string()}]},
+    gmt_diff                       :: {string, string()},
+    dst                            :: {string, string()},
+    provider_id                    :: {string, string()},
+    is_home                        :: {boolean, boolean()},
+    sms_points                     :: {float, float()},
+    sms_mult_points = {float, 1.0} :: {float, float()}
 }).
 
 -include_lib("record_info/include/record_info.hrl").
