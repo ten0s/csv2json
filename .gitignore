@@ -3,3 +3,4 @@ ebin/*
 priv/*
 TAGS
 .eunit/
+rel/csv2json/
