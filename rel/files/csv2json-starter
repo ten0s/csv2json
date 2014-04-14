@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [[ $# -ne 2 ]]; then
+	echo "csv2json <params>"
+	exit 1
+fi
+
+./bin/csv2json script "$1" "$2"

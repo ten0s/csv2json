@@ -1,0 +1,10 @@
+{application, csv2json, [
+    {description, "csv2json"},
+    {vsn, "0.0.1"},
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib
+    ]},
+    {env, []}
+]}.
