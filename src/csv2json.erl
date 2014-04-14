@@ -26,4 +26,4 @@ usage() ->
     ScriptName = escript:script_name(),
     BaseName = filename:basename(ScriptName),
     io:format("Usage: ~s networks <networks file> <prefixes file>~n", [BaseName]),
-    io:format("Usage: ~s networks_maps <maps file> <maps to networks file>~n", [BaseName]).
+    io:format("Usage: ~s network_maps <maps file> <maps to networks file>~n", [BaseName]).
