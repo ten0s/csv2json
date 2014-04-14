@@ -13,6 +13,12 @@ $ make
 ## Usage
 
 <pre>
+$ ./csv2json
+Usage: csv2json networks <networks file> <prefixes file>
+Usage: csv2json networks_maps <maps file> <maps to networks file>
+</pre>
+
+<pre>
 $ ./csv2json networks data/pmm_networks.csv data/pmm_prefixes.csv > pmm_networks.json
 $ mongoimport --host 127.0.0.1 --port 27017 --db kelly --collection networks --file pmm_networks.json -v
 </pre>
