@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ten0s/csv2json.svg?branch=master)](https://travis-ci.org/ten0s/csv2json)
+
 ## Prerequisites
 
 In order to compile and run the **csv2json** utility you need to have [Erlang](http://www.erlang.org/) and GNU make installed.
@@ -14,16 +16,16 @@ $ make
 
 <pre>
 $ ./csv2json
-Usage: csv2json networks <networks file> <prefixes file>
-Usage: csv2json networks_maps <maps file> <maps to networks file>
+Usage: csv2json networks &lt;networks file&gt; &lt;prefixes file&gt;
+Usage: csv2json networks_maps &lt;maps file&gt; &lt;maps to networks file&gt;
 </pre>
 
 <pre>
-$ ./csv2json networks data/pmm_networks.csv data/pmm_prefixes.csv > pmm_networks.json
+$ ./csv2json networks data/pmm_networks.csv data/pmm_prefixes.csv &gt; pmm_networks.json
 $ mongoimport --host 127.0.0.1 --port 27017 --db kelly --collection networks --file pmm_networks.json -v
 </pre>
 
 <pre>
-$ ./csv2json network_maps data/pmm_network_maps.csv data/pmm_maps_to_networks.csv > pmm_network_maps.json
+$ ./csv2json network_maps data/pmm_network_maps.csv data/pmm_maps_to_networks.csv &gt; pmm_network_maps.json
 $ mongoimport --host 127.0.0.1 --port 27017 --db kelly --collection network_maps --file pmm_network_maps.json -v
 </pre>
