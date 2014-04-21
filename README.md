@@ -18,6 +18,7 @@ $ make
 $ ./csv2json
 Usage: csv2json networks &lt;networks file&gt; &lt;prefixes file&gt;
 Usage: csv2json networks_maps &lt;maps file&gt; &lt;maps to networks file&gt;
+Usage: csv2json originators &lt;originators file&gt;
 </pre>
 
 <pre>
@@ -28,4 +29,8 @@ $ mongoimport --host 127.0.0.1 --port 27017 --db kelly --collection networks --f
 <pre>
 $ ./csv2json network_maps data/pmm_network_maps.csv data/pmm_maps_to_networks.csv &gt; pmm_network_maps.json
 $ mongoimport --host 127.0.0.1 --port 27017 --db kelly --collection network_maps --file pmm_network_maps.json -v
+</pre>
+
+<pre>
+$ ./csv2json originators data/pmm_postpaid_customers_originators.csv &gt; pmm_postpaid_customers_originators.json
 </pre>
