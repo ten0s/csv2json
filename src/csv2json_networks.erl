@@ -31,7 +31,6 @@
 
 -include_lib("record_info/include/record_info.hrl").
 -export_record_info([prefix, network]).
--import(record_info, [record_to_proplist/2]).
 
 %% ===================================================================
 %% API
@@ -48,7 +47,7 @@ convert(NetworksFile, PrefixesFile) ->
     Networks2 = set_prefixes_to_networks(Networks, Dict),
     %io:format("~p~n", [Networks2]),
 
-    [csv2json_lib:proplist_to_json(record_to_proplist(N, ?MODULE)) || N <- Networks2].
+    [csv2json_lib:record_to_json(N, ?MODULE) || N <- Networks2].
 
 %% ===================================================================
 %% Internal
@@ -143,14 +142,7 @@ parse_prefix_1_test() ->
     },
     ?assertEqual(ExpPrefix, Prefix),
 
-    Plist = record_to_proplist(Prefix, ?MODULE),
-    ExpPlist = [
-        {network_id, {string, "ccbcdea6-7c7a-4f01-8a08-005c30f89c3d"}},
-        {prefix, {string, "312100"}}
-    ],
-    ?assertEqual(ExpPlist, Plist),
-
-    Json = csv2json_lib:proplist_to_json(Plist),
+    Json = csv2json_lib:record_to_json(Prefix, ?MODULE),
     ExpJson = "{\"network_id\":\"ccbcdea6-7c7a-4f01-8a08-005c30f89c3d\",\"prefix\":\"312100\"}\n",
     ?assertEqual(ExpJson, Json).
 
@@ -163,14 +155,7 @@ parse_prefix_2_test() ->
     },
     ?assertEqual(ExpPrefix, Prefix),
 
-    Plist = record_to_proplist(Prefix, ?MODULE),
-    ExpPlist = [
-        {network_id, {string, "ccbcdea6-7c7a-4f01-8a08-005c30f89c3d"}},
-        {prefix, {string, ""}}
-    ],
-    ?assertEqual(ExpPlist, Plist),
-
-    Json = csv2json_lib:proplist_to_json(Plist),
+    Json = csv2json_lib:record_to_json(Prefix, ?MODULE),
     ExpJson = "{\"network_id\":\"ccbcdea6-7c7a-4f01-8a08-005c30f89c3d\",\"prefix\":\"\"}\n",
     ?assertEqual(ExpJson, Json).
 
@@ -192,8 +177,7 @@ parse_network_1_test() ->
     },
     ?assertEqual(ExpNetwork, Network),
 
-    Plist = record_to_proplist(Network, ?MODULE),
-    Json = csv2json_lib:proplist_to_json(Plist),
+    Json = csv2json_lib:record_to_json(Network, ?MODULE),
     ExpJson = "{\"_id\":\"fca67c04-0b8e-4ac4-a542-6dcaf8f8da17\",\"name\":\"Mobile Comms\",\"country\":\"Albania\",\"hex_code\":\"\",\"country_code\":\"355\",\"number_len\":0,\"prefixes\":[],\"gmt_diff\":\"+1\",\"dst\":\"7,5,3;7,5,10\",\"provider_id\":\"65c4b123-2a51-49e1-84a8-b31dac878d8c\",\"is_home\":false,\"sms_points\":5.0,\"sms_mult_points\":1.0}\n",
     ?assertEqual(ExpJson, Json).
 
@@ -215,8 +199,7 @@ parse_network_2_test() ->
     },
     ?assertEqual(ExpNetwork, Network),
 
-    Plist = record_to_proplist(Network, ?MODULE),
-    Json = csv2json_lib:proplist_to_json(Plist),
+    Json = csv2json_lib:record_to_json(Network, ?MODULE),
     ExpJson = "{\"_id\":\"fca67c04-0b8e-4ac4-a542-6dcaf8f8da17\",\"name\":\"Mobile Comms\",\"country\":\"Albania\",\"hex_code\":\"\",\"country_code\":\"355\",\"number_len\":0,\"prefixes\":[],\"gmt_diff\":\"+1\",\"dst\":\"\",\"provider_id\":\"\",\"is_home\":false,\"sms_points\":5.0,\"sms_mult_points\":1.0}\n",
     ?assertEqual(ExpJson, Json).
 
@@ -260,9 +243,7 @@ build_full_network_test() ->
     ActualPrefixes = Network2#network.prefixes,
     ?assertEqual(ExpectedPrefixes, ActualPrefixes),
 
-    Plist = record_to_proplist(Network2, ?MODULE),
-
-    Json = csv2json_lib:proplist_to_json(Plist),
+    Json = csv2json_lib:record_to_json(Network2, ?MODULE),
     ExpJson = "{\"_id\":\"fca67c04-0b8e-4ac4-a542-6dcaf8f8da17\",\"name\":\"Mobile Comms\",\"country\":\"Albania\",\"hex_code\":\"\",\"country_code\":\"355\",\"number_len\":0,\"prefixes\":[\"663\",\"664\",\"669\"],\"gmt_diff\":\"+1\",\"dst\":\"7,5,3;7,5,10\",\"provider_id\":\"65c4b123-2a51-49e1-84a8-b31dac878d8c\",\"is_home\":false,\"sms_points\":5.0,\"sms_mult_points\":1.0}\n",
     ?assertEqual(ExpJson, Json).
 

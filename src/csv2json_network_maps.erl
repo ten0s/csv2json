@@ -21,7 +21,6 @@
 
 -include_lib("record_info/include/record_info.hrl").
 -export_record_info([map2network, network_map]).
--import(record_info, [record_to_proplist/2]).
 
 %% ===================================================================
 %% API
@@ -38,7 +37,7 @@ convert(MapsFile, MappingsFile) ->
     Maps2 = set_networks_to_maps(Maps, Dict),
     %io:format("~p~n", [Maps2]),
 
-    [csv2json_lib:proplist_to_json(record_to_proplist(M, ?MODULE)) || M <- Maps2].
+    [csv2json_lib:record_to_json(M, ?MODULE) || M <- Maps2].
 
 %% ===================================================================
 %% Internal
@@ -109,14 +108,7 @@ parse_mapping_test() ->
     },
     ?assertEqual(Expected, Actual),
 
-    Plist = record_to_proplist(Actual, ?MODULE),
-    ExpPlist = [
-        {map_id, {string, "59ca05dd-2818-46ce-8055-ae7d51df7486"}},
-        {network_id, {string, "594edd56-089e-4198-b108-4c3d0a3910ec"}}
-    ],
-    ?assertEqual(ExpPlist, Plist),
-
-    Json = csv2json_lib:proplist_to_json(Plist),
+    Json = csv2json_lib:record_to_json(Actual, ?MODULE),
     ExpJson = "{\"map_id\":\"59ca05dd-2818-46ce-8055-ae7d51df7486\",\"network_id\":\"594edd56-089e-4198-b108-4c3d0a3910ec\"}\n",
     ?assertEqual(ExpJson, Json).
 
@@ -129,8 +121,7 @@ parse_map_test() ->
     },
     ?assertEqual(Expected, Actual),
 
-    Plist = record_to_proplist(Expected, ?MODULE),
-    Json = csv2json_lib:proplist_to_json(Plist),
+    Json = csv2json_lib:record_to_json(Actual, ?MODULE),
     ExpJson = "{\"_id\":\"20b8333b-cc64-4f29-9bad-d1deaf314103\",\"name\":\"g#1 + g#2 + ksa\",\"network_ids\":[]}\n",
     ?assertEqual(ExpJson, Json).
 
@@ -163,8 +154,7 @@ build_full_map_test() ->
         name = {string, "Name"}
     },
     [Map2] = set_networks_to_maps([Map], Dict),
-    Plist = record_to_proplist(Map2, ?MODULE),
-    Json = csv2json_lib:proplist_to_json(Plist),
+    Json = csv2json_lib:record_to_json(Map2, ?MODULE),
     ExpJson = "{\"_id\":\"20b8333b-cc64-4f29-9bad-d1deaf314103\",\"name\":\"Name\",\"network_ids\":[\"fca67c04-0b8e-4ac4-a542-6dcaf8f8da17\",\"4db28e38-9920-4930-8807-15adda02bdd2\",\"46598204-33ed-440d-a6a0-c55bf7eb9e3d\"]}\n",
     ?assertEqual(ExpJson, Json).
 

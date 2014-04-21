@@ -7,7 +7,7 @@
     parse_float/1,
     parse_boolean/1,
     parse_string/1,
-    proplist_to_json/1
+    record_to_json/2
 ]).
 
 %-define(TEST, 1).
@@ -84,9 +84,10 @@ parse_string(Str) ->
             {{string, strip(Value, ?COL_WRAPPER)}, []}
     end.
 
--spec proplist_to_json([{atom(), term()}]) -> string().
-proplist_to_json(Plist) ->
-    lists:flatten(lists:reverse(["}\n" | proplist_to_json(Plist, ["{"])])).
+-spec record_to_json(record(), module()) -> string().
+record_to_json(Record, Module) ->
+    Plist = record_info:record_to_proplist(Record, Module),
+    proplist_to_json(Plist, Module).
 
 %% ===================================================================
 %% Internal
@@ -126,34 +127,43 @@ convert_to_float(List) ->
             end
     end.
 
-proplist_to_json([{Key, Value}], Acc) ->
-    KeyValue = format_key_value(Key, Value),
-    [KeyValue | Acc];
-proplist_to_json([{Key, Value} | Plist], Acc) ->
-    KeyValue = format_key_value(Key, Value),
-    proplist_to_json(Plist, [",", KeyValue | Acc]).
+proplist_to_json(Plist, Module) ->
+    proplist_to_json_no_cr(Plist, Module) ++ "\n".
 
-format_key_value(Key, Value) ->
-    [format_key(Key), ":", format_value(Value)].
+proplist_to_json_no_cr(Plist, Module) ->
+    lists:flatten(lists:reverse(["}" | proplist_to_json(Plist, Module, ["{"])])).
+
+proplist_to_json([{Key, Value}], Module, Acc) ->
+    KeyValue = format_key_value(Key, Module, Value),
+    [KeyValue | Acc];
+proplist_to_json([{Key, Value} | Plist], Module, Acc) ->
+    KeyValue = format_key_value(Key, Module, Value),
+    proplist_to_json(Plist, Module, [",", KeyValue | Acc]).
+
+format_key_value(Key, Module, Value) ->
+    [format_key(Key), ":", format_value(Value, Module)].
 
 format_key(Key) ->
     io_lib:format("~p", [atom_to_list(Key)]).
 
-format_value({string, []}) ->
+format_value({string, []}, _Module) ->
     "\"\"";
-format_value({string, Value}) ->
+format_value({string, Value}, _Module) ->
     io_lib:format("~1000000p", [Value]);
-format_value({integer, Value}) ->
+format_value({integer, Value}, _Module) ->
     integer_to_list(Value);
-format_value({array, []}) ->
+format_value({array, []}, _Module) ->
     "[]";
-format_value({array, Array}) ->
-    Values = string:join([format_value(V) || V <- Array], ","),
+format_value({array, Array}, Module) ->
+    Values = string:join([format_value(V, Module) || V <- Array], ","),
     "[" ++ Values ++ "]";
-format_value({boolean, Value}) ->
+format_value({boolean, Value}, _Module) ->
     atom_to_list(Value);
-format_value({float, Value}) ->
-    io_lib:format("~p", [Value]).
+format_value({float, Value}, _Module) ->
+    io_lib:format("~p", [Value]);
+format_value(Record, Module) ->
+    Plist = record_info:record_to_proplist(Record, Module),
+    proplist_to_json_no_cr(Plist, Module).
 
 %% ===================================================================
 %% Tests begin
@@ -175,19 +185,39 @@ split_field_2_test() ->
 
 %parse_{string, integer, float, boolean, uuid}_test
 
-proplist_to_json_test() ->
-    Plist = [
-        {filled_string, {string, "string"}},
-        {empty_string, {string, ""}},
-        {filled_array, {array, [{string, "one"}, {string, "two"}, {string, "three"}]}},
-        {empty_array, {array, []}},
-        {integer, {integer, 1}},
-        {float, {float, 1.0}},
-        {boolean_true, {boolean, true}},
-        {boolean_false, {boolean, false}}
-    ],
-    Json = proplist_to_json(Plist),
-    ExpJson = "{\"filled_string\":\"string\",\"empty_string\":\"\",\"filled_array\":[\"one\",\"two\",\"three\"],\"empty_array\":[],\"integer\":1,\"float\":1.0,\"boolean_true\":true,\"boolean_false\":false}\n",
+-record(outer, {
+    filled_string,
+    empty_string,
+    filled_array,
+    empty_array,
+    integer,
+    float,
+    boolean_true,
+    boolean_false,
+    inner_record
+}).
+
+-record(inner, {
+    field
+}).
+
+-include_lib("record_info/include/record_info.hrl").
+-export_record_info([outer, inner]).
+
+record_to_json_test() ->
+    Outer = #outer{
+        filled_string = {string, "string"},
+        empty_string  = {string, ""},
+        filled_array  = {array, [{string, "one"}, {string, "two"}, {string, "three"}]},
+        empty_array   = {array, []},
+        integer       = {integer, 1},
+        float         = {float, 1.0},
+        boolean_true  = {boolean, true},
+        boolean_false = {boolean, false},
+        inner_record  = #inner{field = {string, "inner_field"}}
+    },
+    Json = record_to_json(Outer, ?MODULE),
+    ExpJson = "{\"filled_string\":\"string\",\"empty_string\":\"\",\"filled_array\":[\"one\",\"two\",\"three\"],\"empty_array\":[],\"integer\":1,\"float\":1.0,\"boolean_true\":true,\"boolean_false\":false,\"inner_record\":{\"field\":\"inner_field\"}}\n",
     ?assertEqual(ExpJson, Json).
 
 -endif.
