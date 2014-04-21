@@ -32,13 +32,7 @@
 -spec convert(string()) -> string().
 convert(OriginatorsFile) ->
     {ok, Originators} = parse_originators_file(OriginatorsFile),
-    io:format("~p~n", [Originators]),
-    %% {ok, Maps} = parse_maps_file(MapsFile),
-    %% %io:format("~p~n", [Maps]),
-
-    %% Dict = build_networks_dict(Mappings),
-    %% Maps2 = set_networks_to_maps(Maps, Dict),
-    %io:format("~p~n", [Maps2]),
+    %io:format("~p~n", [Originators]),
 
     [csv2json_lib:record_to_json(M, ?MODULE) || M <- Originators].
 
@@ -74,7 +68,7 @@ parse_originator_line(Line) ->
     }.
 
 process_originator({string, Originator}) ->
-    case is_digit(Originator) of
+    case all_digits(Originator) of
         true ->
             #address{addr = {string, Originator},
                      ton  = {integer, 1},
@@ -94,7 +88,7 @@ process_status({integer, Status}) ->
         end,
     {string, Status2}.
 
-is_digit(String) ->
+all_digits(String) ->
     lists:all(fun(C) -> C >= $0 andalso C =< $9 end, String).
 
 %% ===================================================================
@@ -103,9 +97,9 @@ is_digit(String) ->
 
 -ifdef(TEST).
 
-is_digit_test() ->
-    ?assert(is_digit("0987654321")),
-    ?assertNot(is_digit("Hello")).
+all_digits_test() ->
+    ?assert(all_digits("0987654321")),
+    ?assertNot(all_digits("Hello")).
 
 parse_originator_test() ->
     Line = "\"b9a5c103-cb86-4770-9678-68f6538ab2cb\",\"f1aa2d75-b597-4ab1-8cca-094bc121da7b\",\"Facebook\",\"Facebook description\",\"1\",\"ae3b4951-92ae-41c5-83b0-6f33f1fd57b9\",\"24.10.2007 10:56:56\",\"\",\"\",\"0\",\"0\",\"1\"",
