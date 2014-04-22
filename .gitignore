@@ -1,6 +1,7 @@
 deps/*
 ebin/*
 priv/*
+data/*
 TAGS
 .eunit/
 rel/csv2json/
