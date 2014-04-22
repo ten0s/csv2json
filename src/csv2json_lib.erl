@@ -7,7 +7,9 @@
     parse_float/1,
     parse_boolean/1,
     parse_string/1,
-    record_to_json/2
+    record_to_json/2,
+    des_encrypt/3,
+    des_decrypt/3
 ]).
 
 %-define(TEST, 1).
@@ -89,9 +91,56 @@ record_to_json(Record, Module) ->
     Plist = record_info:record_to_proplist(Record, Module),
     proplist_to_json(Plist, Module).
 
+-spec des_encrypt(string(), string(), string()) -> string().
+des_encrypt(Key, IVec, Text) when is_list(Key), is_list(IVec), is_list(Text) ->
+    KeyB = list_to_binary(Key),
+    IVecB = list_to_binary(IVec),
+    TextB = list_to_binary(Text),
+    TextU = unicode:characters_to_binary(TextB, utf8, {utf16, little}),
+    TextUPadded = append_padding('PKCS7', TextU),
+    EncryptedB = crypto:des_cbc_encrypt(KeyB, IVecB, TextUPadded),
+    Base64EncryptedB = base64:encode(EncryptedB),
+    binary_to_list(Base64EncryptedB).
+
+-spec des_decrypt(string(), string(), string()) -> string().
+des_decrypt(Key, IVec, Cipher) ->
+    KeyB = list_to_binary(Key),
+    IVecB = list_to_binary(IVec),
+    Base64EncryptedB = list_to_binary(Cipher),
+    EncryptedB = base64:decode(Base64EncryptedB),
+    TextUPadded = crypto:des_cbc_decrypt(KeyB, IVecB, EncryptedB),
+    TextU = strip_padding('PKCS7', TextUPadded),
+    TextB = unicode:characters_to_binary(TextU, {utf16, little}, utf8),
+    binary_to_list(TextB).
+
 %% ===================================================================
 %% Internal
 %% ===================================================================
+
+%%
+%% http://www.di-mgt.com.au/cryptopad.html#exampleecb
+%% Method 1 - Pad with bytes all of the same value as the number of padding bytes
+%%
+append_padding('PKCS7', Bin) ->
+    Size = erlang:size(Bin),
+    Padding =
+        case Size rem 8 of
+            0 ->
+                <<8, 8, 8, 8, 8, 8, 8, 8>>;
+            Size ->
+                PaddingSize = 8 - Size,
+                list_to_binary(lists:duplicate(PaddingSize, PaddingSize))
+        end,
+    <<Bin/binary, Padding/binary>>.
+
+%%
+%% http://www.di-mgt.com.au/cryptopad.html#exampleecb
+%% Method 1 - Pad with bytes all of the same value as the number of padding bytes
+%%
+strip_padding('PKCS7', Bin) ->
+    Size = erlang:size(Bin),
+    PaddingSize = binary:last(Bin),
+    binary:part(Bin, 0, Size - PaddingSize).
 
 split_field([ColWrapper | Rest], _ColDelim, ColWrapper) ->
     {Field, [ColWrapper | Rest2]} =
@@ -219,6 +268,14 @@ record_to_json_test() ->
     Json = record_to_json(Outer, ?MODULE),
     ExpJson = "{\"filled_string\":\"string\",\"empty_string\":\"\",\"filled_array\":[\"one\",\"two\",\"three\"],\"empty_array\":[],\"integer\":1,\"float\":1.0,\"boolean_true\":true,\"boolean_false\":false,\"inner_record\":{\"field\":\"inner_field\"}}\n",
     ?assertEqual(ExpJson, Json).
+
+des_encrypt_decrypt_test() ->
+    K = [128,80,153,234,171,122,153,37],
+    V = [144,122,103,79,15,148,253,85],
+    T1 = "123",
+    T2 = "1234",
+    ?assertEqual(T1, des_decrypt(K, V, des_encrypt(K, V, T1))),
+    ?assertEqual(T2, des_decrypt(K, V, des_encrypt(K, V, T2))).
 
 -endif.
 
