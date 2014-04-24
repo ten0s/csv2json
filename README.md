@@ -22,15 +22,15 @@ Usage: csv2json originators &lt;originators file&gt;
 </pre>
 
 <pre>
-$ ./csv2json networks data/pmm_networks.csv data/pmm_prefixes.csv &gt; pmm_networks.json
-$ mongoimport --host 127.0.0.1 --port 27017 --db kelly --collection networks --file pmm_networks.json -v
+$ ./csv2json networks data/networks.csv data/network_prefixes.csv &gt; networks.json
+$ mongoimport --host 127.0.0.1 --port 27017 --db kelly --collection networks --file networks.json -v
 </pre>
 
 <pre>
-$ ./csv2json network_maps data/pmm_network_maps.csv data/pmm_maps_to_networks.csv &gt; pmm_network_maps.json
-$ mongoimport --host 127.0.0.1 --port 27017 --db kelly --collection network_maps --file pmm_network_maps.json -v
+$ ./csv2json network_maps data/network_maps.csv data/maps_to_networks.csv &gt; network_maps.json
+$ mongoimport --host 127.0.0.1 --port 27017 --db kelly --collection network_maps --file network_maps.json -v
 </pre>
 
 <pre>
-$ ./csv2json originators data/pmm_postpaid_customers_originators.csv &gt; pmm_postpaid_customers_originators.json
+$ ./csv2json originators data/postpaid_customers_originators.csv &gt; postpaid_customers_originators.json
 </pre>
