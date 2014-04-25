@@ -28,6 +28,10 @@ main(["users", UsersFile, Key, IVec]) ->
     Jsons = csv2json_users:convert(UsersFile, Key2, IVec2),
     io:format("~s~n", [Jsons]),
     ok;
+main(["customers", CustomersFile]) ->
+    Jsons = csv2json_customers:convert(CustomersFile),
+    io:format("~s~n", [Jsons]),
+    ok;
 main(_) ->
     usage().
 
@@ -41,4 +45,5 @@ usage() ->
     io:format("Usage: ~s networks <networks file> <prefixes file>~n", [BaseName]),
     io:format("Usage: ~s network_maps <maps file> <maps to networks file>~n", [BaseName]),
     io:format("Usage: ~s originators <originators file>~n", [BaseName]),
-    io:format("Usage: ~s users <users file> <des key> <des ivec>~n", [BaseName]).
+    io:format("Usage: ~s users <users file> <des key> <des ivec>~n", [BaseName]),
+    io:format("Usage: ~s customers <customers file>~n", [BaseName]).
