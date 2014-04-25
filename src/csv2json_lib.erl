@@ -220,6 +220,12 @@ format_value(Record, Module) ->
 
 -ifdef(TEST).
 
+split_field_0_test() ->
+    Str = "\"1\",\"2\",\"3\"",
+    Actual = split_field(Str, $,, $"),
+    Expected = {"\"1\"", ",\"2\",\"3\""},
+    ?assertEqual(Expected, Actual).
+
 split_field_1_test() ->
     Str = "1,2,3,4",
     Actual = split_field(Str, $,, $"),
@@ -254,6 +260,12 @@ split_field_3_3_test() ->
     Str = "\"Zero\"One\"Two\"",
     Actual = split_field(Str, $,, $"),
     Expected = {"ZeroOneTwo", ""},
+    ?assertEqual(Expected, Actual).
+
+split_field_4_test() ->
+    Str = "\"0,0000\",\"1\"",
+    Actual = split_field(Str, $,, $"),
+    Expected = {"\"0,0000\"", ",\"1\""},
     ?assertEqual(Expected, Actual).
 
 %parse_{string, integer, float, boolean, uuid}_test
