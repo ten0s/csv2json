@@ -36,7 +36,7 @@
 %% API
 %% ===================================================================
 
--spec convert(string(), string()) -> string().
+-spec convert(string(), string()) -> [string()].
 convert(NetworksFile, PrefixesFile) ->
     {ok, Prefixes} = parse_prefixes_file(PrefixesFile),
     %io:format("~p~n", [Prefixes]),

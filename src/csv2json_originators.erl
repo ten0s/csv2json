@@ -29,12 +29,12 @@
 %% API
 %% ===================================================================
 
--spec convert(string()) -> string().
+-spec convert(string()) -> [string()].
 convert(OriginatorsFile) ->
     {ok, Originators} = parse_originators_file(OriginatorsFile),
     %io:format("~p~n", [Originators]),
 
-    [csv2json_lib:record_to_json(M, ?MODULE) || M <- Originators].
+    [csv2json_lib:record_to_json(O, ?MODULE) || O <- Originators].
 
 %% ===================================================================
 %% Internal

@@ -31,12 +31,12 @@
 %% API
 %% ===================================================================
 
--spec convert(string(), list(), list()) -> string().
+-spec convert(string(), [byte()], [byte()]) -> [string()].
 convert(UsersFile, Key, IVec) ->
     {ok, Users} = parse_users_file(UsersFile, Key, IVec),
     %io:format("~p~n", [Users]),
 
-    [csv2json_lib:record_to_json(M, ?MODULE) || M <- Users].
+    [csv2json_lib:record_to_json(U, ?MODULE) || U <- Users].
 
 %% ===================================================================
 %% Internal

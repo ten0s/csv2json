@@ -26,7 +26,7 @@
 %% API
 %% ===================================================================
 
--spec convert(string(), string()) -> string().
+-spec convert(string(), string()) -> [string()].
 convert(MapsFile, MappingsFile) ->
     {ok, Mappings} = parse_mappings_file(MappingsFile),
     %io:format("~p~n", [Mappings]),
