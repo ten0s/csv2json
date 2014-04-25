@@ -123,14 +123,8 @@ des_decrypt(Key, IVec, Cipher) ->
 %%
 append_padding('PKCS7', Bin) ->
     Size = erlang:size(Bin),
-    Padding =
-        case Size rem 8 of
-            0 ->
-                <<8, 8, 8, 8, 8, 8, 8, 8>>;
-            Size ->
-                PaddingSize = 8 - Size,
-                list_to_binary(lists:duplicate(PaddingSize, PaddingSize))
-        end,
+    PaddingSize = 8 - (Size rem 8),
+    Padding = list_to_binary(lists:duplicate(PaddingSize, PaddingSize)),
     <<Bin/binary, Padding/binary>>.
 
 %%
@@ -274,8 +268,10 @@ des_encrypt_decrypt_test() ->
     V = [144,122,103,79,15,148,253,85],
     T1 = "123",
     T2 = "1234",
+    T3 = "12345",
     ?assertEqual(T1, des_decrypt(K, V, des_encrypt(K, V, T1))),
-    ?assertEqual(T2, des_decrypt(K, V, des_encrypt(K, V, T2))).
+    ?assertEqual(T2, des_decrypt(K, V, des_encrypt(K, V, T2))),
+    ?assertEqual(T3, des_decrypt(K, V, des_encrypt(K, V, T3))).
 
 -endif.
 
