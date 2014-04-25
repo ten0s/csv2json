@@ -136,11 +136,17 @@ strip_padding('PKCS7', Bin) ->
     PaddingSize = binary:last(Bin),
     binary:part(Bin, 0, Size - PaddingSize).
 
-split_field([ColWrapper | Rest], _ColDelim, ColWrapper) ->
-    {Field, [ColWrapper | Rest2]} =
-        lists:splitwith(fun(C) -> C =/= ColWrapper end, Rest),
-    {[ColWrapper] ++ Field ++ [ColWrapper], Rest2};
-split_field(Str, ColDelim, _ColWrapper) ->
+split_field([ColWrapper | Rest], ColDelim, ColWrapper) ->
+    case lists:splitwith(fun(C) -> C =/= ColWrapper end, Rest) of
+        {Field, [ColWrapper, ColDelim | Rest2]} -> %% 2_test
+            {[ColWrapper] ++ Field ++ [ColWrapper], [ColDelim | Rest2]};
+        {Field, [ColWrapper | []]} ->              %% 2_1_test
+            {[ColWrapper] ++ Field ++ [ColWrapper], []};
+        {Field, [ColWrapper | Rest2]} ->           %% 3_*_test
+            {Field2, Rest3} = split_field(Rest2, ColDelim, ColWrapper),
+            {[C || C <- Field ++ Field2, C =/= ColWrapper], Rest3}
+    end;
+split_field(Str, ColDelim, _ColWrapper) -> %% 1_test
     lists:splitwith(fun(C) -> C =/= ColDelim end, Str).
 
 strip(Str, Char) ->
@@ -215,15 +221,39 @@ format_value(Record, Module) ->
 -ifdef(TEST).
 
 split_field_1_test() ->
+    Str = "1,2,3,4",
+    Actual = split_field(Str, $,, $"),
+    Expected = {"1", ",2,3,4"},
+    ?assertEqual(Expected, Actual).
+
+split_field_2_test() ->
     Str = "\"1,2,3\",\"4\"",
     Actual = split_field(Str, $,, $"),
     Expected = {"\"1,2,3\"", ",\"4\""},
     ?assertEqual(Expected, Actual).
 
-split_field_2_test() ->
-    Str = "1,2,3,4",
+split_field_2_1_test() ->
+    Str = "\"1,2,3\"",
     Actual = split_field(Str, $,, $"),
-    Expected = {"1", ",2,3,4"},
+    Expected = {"\"1,2,3\"", ""},
+    ?assertEqual(Expected, Actual).
+
+split_field_3_1_test() ->
+    Str = "\"\"One\"Two\",\"1\"",
+    Actual = split_field(Str, $,, $"),
+    Expected = {"OneTwo", ",\"1\""},
+    ?assertEqual(Expected, Actual).
+
+split_field_3_2_test() ->
+    Str = "\"\"One\"Two\"",
+    Actual = split_field(Str, $,, $"),
+    Expected = {"OneTwo", ""},
+    ?assertEqual(Expected, Actual).
+
+split_field_3_3_test() ->
+    Str = "\"Zero\"One\"Two\"",
+    Actual = split_field(Str, $,, $"),
+    Expected = {"ZeroOneTwo", ""},
     ?assertEqual(Expected, Actual).
 
 %parse_{string, integer, float, boolean, uuid}_test
