@@ -98,7 +98,7 @@ des_encrypt(Key, IVec, Text) when is_list(Key), is_list(IVec), is_list(Text) ->
     TextB = list_to_binary(Text),
     TextU = unicode:characters_to_binary(TextB, utf8, {utf16, little}),
     TextUPadded = append_padding('PKCS7', TextU),
-    EncryptedB = crypto:des_cbc_encrypt(KeyB, IVecB, TextUPadded),
+    EncryptedB = crypto:block_encrypt(des_cbc, KeyB, IVecB, TextUPadded),
     Base64EncryptedB = base64:encode(EncryptedB),
     binary_to_list(Base64EncryptedB).
 
@@ -108,7 +108,7 @@ des_decrypt(Key, IVec, Cipher) ->
     IVecB = list_to_binary(IVec),
     Base64EncryptedB = list_to_binary(Cipher),
     EncryptedB = base64:decode(Base64EncryptedB),
-    TextUPadded = crypto:des_cbc_decrypt(KeyB, IVecB, EncryptedB),
+    TextUPadded = crypto:block_decrypt(des_cbc, KeyB, IVecB, EncryptedB),
     TextU = strip_padding('PKCS7', TextUPadded),
     TextB = unicode:characters_to_binary(TextU, {utf16, little}, utf8),
     binary_to_list(TextB).
