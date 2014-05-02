@@ -13,25 +13,24 @@
 -include("user.hrl").
 
 -record(customer, {
-    '_id'                         :: {string, string()},
-    customer_id                   :: {string, string()},
-    name                          :: {string, string()},
-    priority                      :: {integer, integer()},
-    rps                           :: {integer, integer()},
-    allowed_sources = {array, []} :: {array, [#address{}]},
-    default_source = undefined    :: #address{} | undefined,
-    network_map_id                :: {string, string()},
-    default_provider_id           :: {string, string()},
-    receipts_allowed              :: {boolean, boolean()},
-    no_retry                      :: {boolean, boolean()},
-    default_validity              :: {string, string()},
-    max_validity                  :: {integer, integer()},
-    users = {array, []}           :: {array, [#user{}]},
-    pay_type                      :: {string, string()},
-    credit                        :: {float, float()},
-    credit_limit                  :: {float, float()},
-    language                      :: {string, string()},
-    state                         :: {string, string()}
+    '_id'                     :: {string, string()},
+    customer_id               :: {string, string()},
+    name                      :: {string, string()},
+    priority                  :: {integer, integer()},
+    rps                       :: {integer, integer()},
+    originators = {array, []} :: {array, [#originator{}]},
+    network_map_id            :: {string, string()},
+    default_provider_id       :: {string, string()},
+    receipts_allowed          :: {boolean, boolean()},
+    no_retry                  :: {boolean, boolean()},
+    default_validity          :: {string, string()},
+    max_validity              :: {integer, integer()},
+    users = {array, []}       :: {array, [#user{}]},
+    pay_type                  :: {string, string()},
+    credit                    :: {float, float()},
+    credit_limit              :: {float, float()},
+    language                  :: {string, string()},
+    state                     :: {string, string()}
 }).
 
 -include_lib("record_info/include/record_info.hrl").
@@ -170,18 +169,7 @@ set_originators_to_customers([C | Cs], Dict, Acc) ->
     C2 =
         case dict:find(CustomerId, Dict) of
             {ok, Originators} ->
-                DefaultSource =
-                    case [O#originator.address || O <- Originators,
-                            O#originator.is_default =:= {boolean, true}] of
-                        [] ->
-                            undefined;
-                        [Address] ->
-                            Address
-                    end,
-                C#customer{
-                    allowed_sources = {array, Originators},
-                    default_source = DefaultSource
-                };
+                C#customer{originators = {array, Originators}};
             error ->
                 C
          end,
@@ -254,8 +242,7 @@ set_originators_test() ->
     [Actual] = set_originators_to_customers([Customer], OriginatorsDict),
     Expected = #customer{
         '_id' = {string, "1f2a0fa3-f720-4fb5-8521-b7fbab088e7e"},
-        allowed_sources = {array, [Originator]},
-        default_source = Address
+        originators = {array, [Originator]}
     },
     ?assertEqual(Expected, Actual).
 
@@ -310,8 +297,7 @@ json_test() ->
         name                = {string, "STC"},
         priority            = {integer, 5},
         rps                 = {integer, 10000},
-        allowed_sources     = {array, [Originator]},
-        default_source      = Address,
+        originators         = {array, [Originator]},
         network_map_id      = {string, "93ae08b7-40ed-4fa7-b33e-02dbf59d44ee"},
         default_provider_id = {string, "8b80645a-b108-4b54-9cd8-4e70e5d1ce4b"},
         receipts_allowed    = {boolean, true},
@@ -327,7 +313,7 @@ json_test() ->
     },
 
     Actual = csv2json_lib:record_to_json(Customer, ?MODULE),
-    Expected = "{\"_id\":\"1f2a0fa3-f720-4fb5-8521-b7fbab088e7e\",\"customer_id\":\"1245\",\"name\":\"STC\",\"priority\":5,\"rps\":10000,\"allowed_sources\":[{\"address\":{\"addr\":\"Facebook\",\"ton\":5,\"npi\":0},\"description\":\"Facebook description\",\"status\":\"approved\",\"is_default\":true}],\"default_source\":{\"addr\":\"Facebook\",\"ton\":5,\"npi\":0},\"network_map_id\":\"93ae08b7-40ed-4fa7-b33e-02dbf59d44ee\",\"default_provider_id\":\"8b80645a-b108-4b54-9cd8-4e70e5d1ce4b\",\"receipts_allowed\":true,\"no_retry\":false,\"default_validity\":\"000003000000000R\",\"max_validity\":259200,\"users\":[{\"id\":\"name\",\"password\":\"bba6aee5e30c314fb0a4fb916d32491z\",\"connection_types\":[\"mm\",\"soap\",\"oneapi\"],\"state\":\"active\",\"mobile_phone\":\"111223334455\",\"first_name\":\"first name\",\"last_name\":\"last name\",\"company\":\"Company\",\"occupation\":\"IT\",\"email\":\"name@email.com\",\"country\":\"country\",\"language\":\"en\"}],\"pay_type\":\"postpaid\",\"credit\":-1406470.0,\"credit_limit\":99999999999.0,\"language\":\"en\",\"state\":\"active\"}\n",
+    Expected = "{\"_id\":\"1f2a0fa3-f720-4fb5-8521-b7fbab088e7e\",\"customer_id\":\"1245\",\"name\":\"STC\",\"priority\":5,\"rps\":10000,\"originators\":[{\"address\":{\"addr\":\"Facebook\",\"ton\":5,\"npi\":0},\"description\":\"Facebook description\",\"status\":\"approved\",\"is_default\":true}],\"network_map_id\":\"93ae08b7-40ed-4fa7-b33e-02dbf59d44ee\",\"default_provider_id\":\"8b80645a-b108-4b54-9cd8-4e70e5d1ce4b\",\"receipts_allowed\":true,\"no_retry\":false,\"default_validity\":\"000003000000000R\",\"max_validity\":259200,\"users\":[{\"id\":\"name\",\"password\":\"bba6aee5e30c314fb0a4fb916d32491z\",\"connection_types\":[\"mm\",\"soap\",\"oneapi\"],\"state\":\"active\",\"mobile_phone\":\"111223334455\",\"first_name\":\"first name\",\"last_name\":\"last name\",\"company\":\"Company\",\"occupation\":\"IT\",\"email\":\"name@email.com\",\"country\":\"country\",\"language\":\"en\"}],\"pay_type\":\"postpaid\",\"credit\":-1406470.0,\"credit_limit\":99999999999.0,\"language\":\"en\",\"state\":\"active\"}\n",
     ?assertEqual(Expected, Actual).
 
 -endif.
