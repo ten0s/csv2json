@@ -1,6 +1,6 @@
 -module(csv2json_network_maps).
 
--export([convert/2]).
+-export([parse_files/2]).
 
 %-define(TEST, 1).
 -ifdef(TEST).
@@ -26,8 +26,8 @@
 %% API
 %% ===================================================================
 
--spec convert(string(), string()) -> [string()].
-convert(MapsFile, MappingsFile) ->
+-spec parse_files(string(), string()) -> [string()].
+parse_files(MapsFile, MappingsFile) ->
     {ok, Mappings} = parse_mappings_file(MappingsFile),
     %io:format("~p~n", [Mappings]),
     {ok, Maps} = parse_maps_file(MapsFile),
@@ -37,17 +37,17 @@ convert(MapsFile, MappingsFile) ->
     Maps2 = set_networks_to_maps(Maps, Dict),
     %io:format("~p~n", [Maps2]),
 
-    [csv2json_lib:record_to_json(M, ?MODULE) || M <- Maps2].
+    {ok, Maps2}.
 
 %% ===================================================================
 %% Internal
 %% ===================================================================
 
 parse_mappings_file(Filename) ->
-    csv2json_lib:parse_file(Filename, fun(L) -> parse_mapping_line(L) end).
+    csv2json_lib:parse_file(Filename, fun parse_mapping_line/1).
 
 parse_maps_file(Filename) ->
-    csv2json_lib:parse_file(Filename, fun(L) -> parse_map_line(L) end).
+    csv2json_lib:parse_file(Filename, fun parse_map_line/1).
 
 build_networks_dict(Mappings) ->
     build_networks_dict(Mappings, dict:new()).

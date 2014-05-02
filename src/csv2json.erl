@@ -8,15 +8,18 @@
 
 -spec main(list()) -> no_return().
 main(["networks", NetworksFile, PrefixesFile]) ->
-    Jsons = csv2json_networks:convert(NetworksFile, PrefixesFile),
+    {ok, Networks} = csv2json_networks:parse_files(NetworksFile, PrefixesFile),
+    Jsons = [csv2json_lib:record_to_json(N, csv2json_networks) || N <- Networks],
     io:format("~s~n", [Jsons]),
     ok;
 main(["network_maps", MapsFile, MappingFile]) ->
-    Jsons = csv2json_network_maps:convert(MapsFile, MappingFile),
+    {ok, Maps} = csv2json_network_maps:parse_files(MapsFile, MappingFile),
+    Jsons = [csv2json_lib:record_to_json(M, csv2json_network_maps) || M <- Maps],
     io:format("~s~n", [Jsons]),
     ok;
 main(["originators", OriginatorsFile]) ->
-    Jsons = csv2json_originators:convert(OriginatorsFile),
+    {ok, Originators} = csv2json_originators:parse_file(OriginatorsFile),
+    Jsons = [csv2json_lib:record_to_json(O, csv2json_originators) || O <- Originators],
     io:format("~s~n", [Jsons]),
     ok;
 main(["users", UsersFile, Key, IVec]) ->
@@ -25,11 +28,13 @@ main(["users", UsersFile, Key, IVec]) ->
     end,
     Key2 = ToIntList(Key),
     IVec2 = ToIntList(IVec),
-    Jsons = csv2json_users:convert(UsersFile, Key2, IVec2),
+    {ok, Users} = csv2json_users:parse_file(UsersFile, Key2, IVec2),
+    Jsons = [csv2json_lib:record_to_json(U, csv2json_users) || U <- Users],
     io:format("~s~n", [Jsons]),
     ok;
 main(["customers", CustomersFile]) ->
-    Jsons = csv2json_customers:convert(CustomersFile),
+    {ok, Customers} = csv2json_customers:parse_file(CustomersFile),
+    Jsons = [csv2json_lib:record_to_json(C, csv2json_customers) || C <- Customers],
     io:format("~s~n", [Jsons]),
     ok;
 main(_) ->

@@ -1,6 +1,6 @@
 -module(csv2json_customers).
 
--export([convert/1]).
+-export([parse_file/1]).
 
 %-define(TEST, 1).
 -ifdef(TEST).
@@ -37,19 +37,17 @@
 %% API
 %% ===================================================================
 
--spec convert(string()) -> [string()].
-convert(CustomersFile) ->
-    {ok, Customers} = parse_customers_file(CustomersFile),
-    %io:format("~p~n", [Customers]),
+-spec parse_file(string()) -> [string()].
+parse_file(CustomersFile) ->
+    parse_customers_file(CustomersFile).
 
-    [csv2json_lib:record_to_json(C, ?MODULE) || C <- Customers].
 
 %% ===================================================================
 %% Internal
 %% ===================================================================
 
 parse_customers_file(Filename) ->
-    csv2json_lib:parse_file(Filename, fun(L) -> parse_customer_line(L) end).
+    csv2json_lib:parse_file(Filename, fun parse_customer_line/1).
 
 parse_customer_line(Line) ->
     %io:format("~p~n", [Line]),

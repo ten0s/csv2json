@@ -1,6 +1,6 @@
 -module(csv2json_users).
 
--export([convert/3]).
+-export([parse_file/3]).
 
 %-define(TEST, 1).
 -ifdef(TEST).
@@ -8,22 +8,7 @@
     -compile(export_all).
 -endif.
 
--record(user, {
-    customer_id      :: {string, string()},
-    id               :: {string, string()},
-    password         :: {string, string()},
-    connection_types :: {array, [{string, string()}]},
-    state            :: {string, string()},
-    mobile_phone     :: {integer, integer()},
-    first_name       :: {string, string()},
-    last_name        :: {string, string()},
-    company          :: {string, string()},
-    occupation       :: {string, string()},
-    email            :: {string, string()},
-    country          :: {string, string()},
-    language         :: {string, string()}
-}).
-
+-include("user.hrl").
 -include_lib("record_info/include/record_info.hrl").
 -export_record_info([user]).
 
@@ -31,21 +16,15 @@
 %% API
 %% ===================================================================
 
--spec convert(string(), [byte()], [byte()]) -> [string()].
-convert(UsersFile, Key, IVec) ->
-    {ok, Users} = parse_users_file(UsersFile, Key, IVec),
-    %io:format("~p~n", [Users]),
-
-    [csv2json_lib:record_to_json(U, ?MODULE) || U <- Users].
+-spec parse_file(string(), [byte()], [byte()]) -> {ok, [#user{}]}.
+parse_file(Filename, Key, IVec) ->
+    csv2json_lib:parse_file(Filename, fun(L) -> parse_line(L, Key, IVec) end).
 
 %% ===================================================================
 %% Internal
 %% ===================================================================
 
-parse_users_file(Filename, Key, IVec) ->
-    csv2json_lib:parse_file(Filename, fun(L) -> parse_user_line(L, Key, IVec) end).
-
-parse_user_line(Line, Key, IVec) ->
+parse_line(Line, Key, IVec) ->
     %io:format("~p~n", [Line]),
     {_ID,                  Line2} = csv2json_lib:parse_uuid(Line),
     {CustomerID,           Line3} = csv2json_lib:parse_uuid(Line2),
@@ -117,11 +96,11 @@ decrypt(Key, IVec, {string, Text}) ->
 
 -ifdef(TEST).
 
-parse_user_test() ->
+parse_line_test() ->
     Line = "\"e917de20-2af0-43c7-bead-adee0453177c\",\"0e47952f-22ed-48fe-a975-94a043a6da76\",\"oZjWRY2+/h5wBWtRtjtfHw==\",\"bba6aee5e30c314fb0a4fb916d32491z\",\"1\",\"P3zSKLoV/v1nXDp35hwEHme8X2dwIW9bvhi27OLxqkA=\",\"viRZIIeC73zzXkv1VbM4h5MUPb3le2os\",\"f2u8gA54yVB6DZpoai6SU27Hep9B8cQN\",\"Z2JsJxzSLqu8mV2QChl1Gw==\",\"YU/45ZnAYmg=\",\"oZjWRY2+/h5hApifzt3xpPfb0yvC7WJxcUoB2vHsDcA=\",\"YmOaS/yMN+nQWJBvFQirSg==\",\"0\",\"1\",\"1\",\"ae3b4951-92ae-41c5-83b0-6f33f1fd57b9\",\"26.05.2007 11:59:16\",\"097c6eea-fae5-452c-a6bf-90bb6100fae4\",\"18.02.2010 16:19:14\",\"723AEEC4012FD648\",\"1\",\"0\",\"en\",\"0\",\"1\",\"0\"",
     Key = [114,185,242,128,80,153,234,171],
     IVec = [122,153,37,54,178,41,143,55],
-    Actual = parse_user_line(Line, Key, IVec),
+    Actual = parse_line(Line, Key, IVec),
     Expected = #user{
         customer_id      = {string, "0e47952f-22ed-48fe-a975-94a043a6da76"},
         id               = {string, "name"},

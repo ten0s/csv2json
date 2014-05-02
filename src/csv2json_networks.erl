@@ -1,6 +1,6 @@
 -module(csv2json_networks).
 
--export([convert/2]).
+-export([parse_files/2]).
 
 %-define(TEST, 1).
 -ifdef(TEST).
@@ -36,8 +36,8 @@
 %% API
 %% ===================================================================
 
--spec convert(string(), string()) -> [string()].
-convert(NetworksFile, PrefixesFile) ->
+-spec parse_files(string(), string()) -> [string()].
+parse_files(NetworksFile, PrefixesFile) ->
     {ok, Prefixes} = parse_prefixes_file(PrefixesFile),
     %io:format("~p~n", [Prefixes]),
     {ok, Networks} = parse_networks_file(NetworksFile),
@@ -47,17 +47,17 @@ convert(NetworksFile, PrefixesFile) ->
     Networks2 = set_prefixes_to_networks(Networks, Dict),
     %io:format("~p~n", [Networks2]),
 
-    [csv2json_lib:record_to_json(N, ?MODULE) || N <- Networks2].
+    {ok, Networks2}.
 
 %% ===================================================================
 %% Internal
 %% ===================================================================
 
 parse_networks_file(Filename) ->
-    csv2json_lib:parse_file(Filename, fun(L) -> parse_network_line(L) end).
+    csv2json_lib:parse_file(Filename, fun parse_network_line/1).
 
 parse_prefixes_file(Filename) ->
-    csv2json_lib:parse_file(Filename, fun(L) -> parse_prefix_line(L) end).
+    csv2json_lib:parse_file(Filename, fun parse_prefix_line/1).
 
 build_prefixes_dict(Prefixes) ->
     build_prefixes_dict(Prefixes, dict:new()).

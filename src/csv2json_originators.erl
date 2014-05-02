@@ -1,6 +1,6 @@
 -module(csv2json_originators).
 
--export([convert/1]).
+-export([parse_file/1]).
 
 %-define(TEST, 1).
 -ifdef(TEST).
@@ -8,20 +8,7 @@
     -compile(export_all).
 -endif.
 
--record(address, {
-    addr                      :: {string, string()},
-    ton                       :: {integer, integer()},
-    npi                       :: {integer, integer()}
-}).
-
--record(originator, {
-    customer_id               :: {string, string()},
-    address                   :: {string, string()},
-    description               :: {string, string()},
-    status                    :: {string, string()},
-    is_default                :: {boolean, boolean()}
-}).
-
+-include("originator.hrl").
 -include_lib("record_info/include/record_info.hrl").
 -export_record_info([address, originator]).
 
@@ -29,21 +16,15 @@
 %% API
 %% ===================================================================
 
--spec convert(string()) -> [string()].
-convert(OriginatorsFile) ->
-    {ok, Originators} = parse_originators_file(OriginatorsFile),
-    %io:format("~p~n", [Originators]),
-
-    [csv2json_lib:record_to_json(O, ?MODULE) || O <- Originators].
+-spec parse_file(string()) -> {ok, [#originator{}]}.
+parse_file(Filename) ->
+    csv2json_lib:parse_file(Filename, fun parse_line/1).
 
 %% ===================================================================
 %% Internal
 %% ===================================================================
 
-parse_originators_file(Filename) ->
-    csv2json_lib:parse_file(Filename, fun(L) -> parse_originator_line(L) end).
-
-parse_originator_line(Line) ->
+parse_line(Line) ->
     %io:format("~p~n", [Line]),
     {_ID,           Line2} = csv2json_lib:parse_uuid(Line),
     {CustomerID,    Line3} = csv2json_lib:parse_uuid(Line2),
@@ -101,9 +82,9 @@ all_digits_test() ->
     ?assert(all_digits("0987654321")),
     ?assertNot(all_digits("Hello")).
 
-parse_originator_test() ->
+parse_line_test() ->
     Line = "\"b9a5c103-cb86-4770-9678-68f6538ab2cb\",\"f1aa2d75-b597-4ab1-8cca-094bc121da7b\",\"Facebook\",\"Facebook description\",\"1\",\"ae3b4951-92ae-41c5-83b0-6f33f1fd57b9\",\"24.10.2007 10:56:56\",\"\",\"\",\"0\",\"0\",\"1\"",
-    Actual = parse_originator_line(Line),
+    Actual = parse_line(Line),
     Expected = #originator{
         customer_id = {string, "f1aa2d75-b597-4ab1-8cca-094bc121da7b"},
         address     = #address{addr = {string, "Facebook"},
