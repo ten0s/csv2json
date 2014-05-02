@@ -21,6 +21,7 @@ Usage: csv2json networks_maps &lt;maps file&gt; &lt;maps to networks file&gt;
 Usage: csv2json originators &lt;originators file&gt;
 Usage: csv2json users &lt;users file&gt; &lt;des key&gt; &lt;ivec&gt;
 Usage: csv2json customers &lt;customers file&gt;
+Usage: csv2json customers &lt;customers file&gt; &lt;originators file&gt; &lt;users file&gt; &lt;des key&gt; &lt;ivec&gt;
 </pre>
 
 <pre>

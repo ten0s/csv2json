@@ -34,6 +34,13 @@ main(["customers", CustomersFile]) ->
     Jsons = [csv2json_lib:record_to_json(C, csv2json_customers) || C <- Customers],
     io:format("~s~n", [Jsons]),
     ok;
+main(["customers", CustomersFile, OriginatorsFile, UsersFile, Key, IVec]) ->
+    Key2 = string_to_bytes(Key),
+    IVec2 = string_to_bytes(IVec),
+    {ok, Customers} = csv2json_customers:parse_files(CustomersFile, OriginatorsFile, UsersFile, Key2, IVec2),
+    Jsons = [csv2json_lib:record_to_json(C, csv2json_customers) || C <- Customers],
+    io:format("~s~n", [Jsons]),
+    ok;
 main(_) ->
     usage().
 
@@ -48,6 +55,8 @@ usage() ->
     io:format("Usage: ~s network_maps <maps file> <maps to networks file>~n", [BaseName]),
     io:format("Usage: ~s originators <originators file>~n", [BaseName]),
     io:format("Usage: ~s users <users file> <des key> <des ivec>~n", [BaseName]),
+    io:format("Usage: ~s customers <customers file>~n", [BaseName]),
+    io:format("Usage: ~s customers <customers file> <originators file> <users file> <des key> <des ivec>~n", [BaseName]).
 
 string_to_bytes(Str) ->
     [list_to_integer(X) || X <- string:tokens(Str, ",")].
