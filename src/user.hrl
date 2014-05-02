@@ -2,7 +2,7 @@
 -define(user_hrl, 1).
 
 -record(user, {
-    id               :: {string, string()},
+    user_id          :: {string, string()},
     password         :: {string, string()},
     connection_types :: {array, [{string, string()}]},
     state            :: {string, string()},

@@ -56,7 +56,7 @@ parse_line(Line, Key, IVec) ->
     #user_ref{
         customer_id = CustomerID,
         user = #user{
-            id = Decrypt(Username),
+            user_id = Decrypt(Username),
             password = Password,
             connection_types = {array, [{string, "mm"}, {string, "soap"}, {string, "oneapi"}]},
             state = process_blocked(Blocked),
@@ -106,7 +106,7 @@ parse_line_test() ->
     Expected = #user_ref{
         customer_id = {string, "0e47952f-22ed-48fe-a975-94a043a6da76"},
         user = #user{
-            id               = {string, "name"},
+            user_id          = {string, "name"},
             password         = {string, "bba6aee5e30c314fb0a4fb916d32491z"},
             connection_types = {array, [{string, "mm"}, {string, "soap"}, {string, "oneapi"}]},
             state            = {string, "active"},
@@ -123,7 +123,7 @@ parse_line_test() ->
     ?assertEqual(Expected, Actual),
 
     Json = csv2json_lib:record_to_json(Actual, ?MODULE),
-    ExpJson = "{\"customer_id\":\"0e47952f-22ed-48fe-a975-94a043a6da76\",\"user\":{\"id\":\"name\",\"password\":\"bba6aee5e30c314fb0a4fb916d32491z\",\"connection_types\":[\"mm\",\"soap\",\"oneapi\"],\"state\":\"active\",\"mobile_phone\":\"111223334455\",\"first_name\":\"first name\",\"last_name\":\"last name\",\"company\":\"Company\",\"occupation\":\"IT\",\"email\":\"name@email.com\",\"country\":\"country\",\"language\":\"en\"}}\n",
+    ExpJson = "{\"customer_id\":\"0e47952f-22ed-48fe-a975-94a043a6da76\",\"user\":{\"user_id\":\"name\",\"password\":\"bba6aee5e30c314fb0a4fb916d32491z\",\"connection_types\":[\"mm\",\"soap\",\"oneapi\"],\"state\":\"active\",\"mobile_phone\":\"111223334455\",\"first_name\":\"first name\",\"last_name\":\"last name\",\"company\":\"Company\",\"occupation\":\"IT\",\"email\":\"name@email.com\",\"country\":\"country\",\"language\":\"en\"}}\n",
     ?assertEqual(ExpJson, Json).
 
 -endif.
