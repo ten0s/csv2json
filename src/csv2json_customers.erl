@@ -8,26 +8,29 @@
     -compile(export_all).
 -endif.
 
+-include("originator.hrl").
+-include("user.hrl").
+
 -record(customer, {
-    '_id'               :: {string, string()},
-    customer_id         :: {string, string()},
-    name                :: {string, string()},
-    priority            :: {integer, integer()},
-    rps                 :: {integer, integer()},
-%    allowed_sources     :: [addr()],
-%    default_source      :: addr() | undefined,
-    network_map_id      :: {string, string()},
-    default_provider_id :: {string, string()},
-    receipts_allowed    :: {boolean, boolean()},
-    no_retry            :: {boolean, boolean()},
-    default_validity    :: {string, string()},
-    max_validity        :: {integer, integer()},
-%   users = []          :: [user()] | [],
-    pay_type            :: {string, string()},
-    credit              :: {float, float()},
-    credit_limit        :: {float, float()},
-    language            :: {string, string()},
-    state               :: {string, string()}
+    '_id'                         :: {string, string()},
+    customer_id                   :: {string, string()},
+    name                          :: {string, string()},
+    priority                      :: {integer, integer()},
+    rps                           :: {integer, integer()},
+    allowed_sources = {array, []} :: {array, [#address{}]},
+    default_source = undefined    :: #address{} | undefined,
+    network_map_id                :: {string, string()},
+    default_provider_id           :: {string, string()},
+    receipts_allowed              :: {boolean, boolean()},
+    no_retry                      :: {boolean, boolean()},
+    default_validity              :: {string, string()},
+    max_validity                  :: {integer, integer()},
+    users = {array, []}           :: {array, [#user{}]},
+    pay_type                      :: {string, string()},
+    credit                        :: {float, float()},
+    credit_limit                  :: {float, float()},
+    language                      :: {string, string()},
+    state                         :: {string, string()}
 }).
 
 -include_lib("record_info/include/record_info.hrl").
@@ -39,17 +42,14 @@
 
 -spec parse_file(string()) -> [string()].
 parse_file(CustomersFile) ->
-    parse_customers_file(CustomersFile).
+    csv2json_lib:parse_file(CustomersFile, fun parse_line/1).
 
 
 %% ===================================================================
 %% Internal
 %% ===================================================================
 
-parse_customers_file(Filename) ->
-    csv2json_lib:parse_file(Filename, fun parse_customer_line/1).
-
-parse_customer_line(Line) ->
+parse_line(Line) ->
     %io:format("~p~n", [Line]),
     {ID,                     Line2} = csv2json_lib:parse_uuid(Line),
     {CustomerID,             Line3} = csv2json_lib:parse_uuid(Line2),
@@ -132,10 +132,10 @@ process_pay_type({string, PayTypeID}) ->
 
 -ifdef(TEST).
 
-parse_user_test() ->
+parse_line_test() ->
     Line = "\"1f2a0fa3-f720-4fb5-8521-b7fbab088e7e\",\"1245\",\"STC\",\"-1406470,0000\",\"99999999999,0000\",\"5\",\"Standard\",\"0\",\"ae3b4951-92ae-41c5-83b0-6f33f1fd57b9\",\"08.03.2010 2:38:05\",\"ae3b4951-92ae-41c5-83b0-6f33f1fd57b9\",\"08.03.2010 11:36:15\",\"False\",\"93ae08b7-40ed-4fa7-b33e-02dbf59d44ee\",\"1\",\"0\",\"\",\"\",\"PT_POSTPAID\",\"0,0000\",\"CORPORATE\",\"\",\"\",\"10\",\"\",\"8b80645a-b108-4b54-9cd8-4e70e5d1ce4b\",\"\",\"\",\"en\",\"\",\"1\",\"30.01.2011 9:26:33\",\"False\",\"\",\"\",\"\",\"\",\"\"",
 
-    Actual = parse_customer_line(Line),
+    Actual = parse_line(Line),
     Expected = #customer{
         '_id'               = {string, "1f2a0fa3-f720-4fb5-8521-b7fbab088e7e"},
         customer_id         = {string, "1245"},
@@ -157,7 +157,7 @@ parse_user_test() ->
     ?assertEqual(Expected, Actual),
 
     Json = csv2json_lib:record_to_json(Actual, ?MODULE),
-    ExpJson = "{\"_id\":\"1f2a0fa3-f720-4fb5-8521-b7fbab088e7e\",\"customer_id\":\"1245\",\"name\":\"STC\",\"priority\":5,\"rps\":10000,\"network_map_id\":\"93ae08b7-40ed-4fa7-b33e-02dbf59d44ee\",\"default_provider_id\":\"8b80645a-b108-4b54-9cd8-4e70e5d1ce4b\",\"receipts_allowed\":true,\"no_retry\":false,\"default_validity\":\"000003000000000R\",\"max_validity\":259200,\"pay_type\":\"postpaid\",\"credit\":-1406470.0,\"credit_limit\":99999999999.0,\"language\":\"en\",\"state\":\"active\"}\n",
+    ExpJson = "{\"_id\":\"1f2a0fa3-f720-4fb5-8521-b7fbab088e7e\",\"customer_id\":\"1245\",\"name\":\"STC\",\"priority\":5,\"rps\":10000,\"allowed_sources\":[],\"default_source\":null,\"network_map_id\":\"93ae08b7-40ed-4fa7-b33e-02dbf59d44ee\",\"default_provider_id\":\"8b80645a-b108-4b54-9cd8-4e70e5d1ce4b\",\"receipts_allowed\":true,\"no_retry\":false,\"default_validity\":\"000003000000000R\",\"max_validity\":259200,\"users\":[],\"pay_type\":\"postpaid\",\"credit\":-1406470.0,\"credit_limit\":99999999999.0,\"language\":\"en\",\"state\":\"active\"}\n",
     ?assertEqual(ExpJson, Json).
 
 -endif.

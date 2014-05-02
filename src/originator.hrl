@@ -9,7 +9,7 @@
 
 -record(originator, {
     customer_id               :: {string, string()},
-    address                   :: {string, string()},
+    address                   :: #address{},
     description               :: {string, string()},
     status                    :: {string, string()},
     is_default                :: {boolean, boolean()}

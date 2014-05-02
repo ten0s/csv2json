@@ -195,6 +195,8 @@ format_key_value(Key, Module, Value) ->
 format_key(Key) ->
     io_lib:format("~p", [atom_to_list(Key)]).
 
+format_value(undefined, _Module) ->
+    "null";
 format_value({string, []}, _Module) ->
     "\"\"";
 format_value({string, Value}, _Module) ->
@@ -279,6 +281,7 @@ split_field_4_test() ->
     float,
     boolean_true,
     boolean_false,
+    undefined,
     inner_record
 }).
 
@@ -299,10 +302,11 @@ record_to_json_test() ->
         float         = {float, 1.0},
         boolean_true  = {boolean, true},
         boolean_false = {boolean, false},
+        undefined     = undefined,
         inner_record  = #inner{field = {string, "inner_field"}}
     },
     Json = record_to_json(Outer, ?MODULE),
-    ExpJson = "{\"filled_string\":\"string\",\"empty_string\":\"\",\"filled_array\":[\"one\",\"two\",\"three\"],\"empty_array\":[],\"integer\":1,\"float\":1.0,\"boolean_true\":true,\"boolean_false\":false,\"inner_record\":{\"field\":\"inner_field\"}}\n",
+    ExpJson = "{\"filled_string\":\"string\",\"empty_string\":\"\",\"filled_array\":[\"one\",\"two\",\"three\"],\"empty_array\":[],\"integer\":1,\"float\":1.0,\"boolean_true\":true,\"boolean_false\":false,\"undefined\":null,\"inner_record\":{\"field\":\"inner_field\"}}\n",
     ?assertEqual(ExpJson, Json).
 
 des_encrypt_decrypt_test() ->
