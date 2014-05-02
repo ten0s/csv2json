@@ -45,7 +45,7 @@ parse_line(Line) ->
         originator = #originator{
             address     = Address,
             description = Description,
-            status      = Status2,
+            state       = Status2,
             is_default  = IsDefault
         }
     }.
@@ -96,14 +96,14 @@ parse_line_test() ->
                 npi  = {integer, 0}
             },
             description = {string, "Facebook description"},
-            status      = {string, "approved"},
+            state       = {string, "approved"},
             is_default  = {boolean, false}
         }
     },
     ?assertEqual(Expected, Actual),
 
     Json = csv2json_lib:record_to_json(Actual, ?MODULE),
-    ExpJson = "{\"customer_id\":\"f1aa2d75-b597-4ab1-8cca-094bc121da7b\",\"originator\":{\"address\":{\"addr\":\"Facebook\",\"ton\":5,\"npi\":0},\"description\":\"Facebook description\",\"status\":\"approved\",\"is_default\":false}}\n",
+    ExpJson = "{\"customer_id\":\"f1aa2d75-b597-4ab1-8cca-094bc121da7b\",\"originator\":{\"address\":{\"addr\":\"Facebook\",\"ton\":5,\"npi\":0},\"description\":\"Facebook description\",\"state\":\"approved\",\"is_default\":false}}\n",
     ?assertEqual(ExpJson, Json).
 
 -endif.

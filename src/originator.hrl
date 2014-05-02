@@ -10,7 +10,7 @@
 -record(originator, {
     address                   :: #address{},
     description               :: {string, string()},
-    status                    :: {string, string()},
+    state                     :: {string, string()},
     is_default                :: {boolean, boolean()}
 }).
 
