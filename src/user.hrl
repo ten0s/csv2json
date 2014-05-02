@@ -2,7 +2,6 @@
 -define(user_hrl, 1).
 
 -record(user, {
-    customer_id      :: {string, string()},
     id               :: {string, string()},
     password         :: {string, string()},
     connection_types :: {array, [{string, string()}]},
@@ -15,6 +14,11 @@
     email            :: {string, string()},
     country          :: {string, string()},
     language         :: {string, string()}
+}).
+
+-record(user_ref, {
+    customer_id      :: {string, string()},
+    user             :: #user{}
 }).
 
 -endif.

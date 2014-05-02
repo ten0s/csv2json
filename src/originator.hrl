@@ -8,11 +8,15 @@
 }).
 
 -record(originator, {
-    customer_id               :: {string, string()},
     address                   :: #address{},
     description               :: {string, string()},
     status                    :: {string, string()},
     is_default                :: {boolean, boolean()}
+}).
+
+-record(originator_ref, {
+    customer_id               :: {string, string()},
+    originator                :: #originator{}
 }).
 
 -endif.

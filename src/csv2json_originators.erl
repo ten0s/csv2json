@@ -10,7 +10,7 @@
 
 -include("originator.hrl").
 -include_lib("record_info/include/record_info.hrl").
--export_record_info([address, originator]).
+-export_record_info([address, originator, originator_ref]).
 
 %% ===================================================================
 %% API
@@ -40,12 +40,14 @@ parse_line(Line) ->
     {_BypassBlacklist, []} = csv2json_lib:parse_string(Line12),
     Address = process_originator(Originator),
     Status2 = process_status(Status),
-    #originator{
+    #originator_ref{
         customer_id = CustomerID,
-        address     = Address,
-        description = Description,
-        status      = Status2,
-        is_default  = IsDefault
+        originator = #originator{
+            address     = Address,
+            description = Description,
+            status      = Status2,
+            is_default  = IsDefault
+        }
     }.
 
 process_originator({string, Originator}) ->
@@ -85,19 +87,23 @@ all_digits_test() ->
 parse_line_test() ->
     Line = "\"b9a5c103-cb86-4770-9678-68f6538ab2cb\",\"f1aa2d75-b597-4ab1-8cca-094bc121da7b\",\"Facebook\",\"Facebook description\",\"1\",\"ae3b4951-92ae-41c5-83b0-6f33f1fd57b9\",\"24.10.2007 10:56:56\",\"\",\"\",\"0\",\"0\",\"1\"",
     Actual = parse_line(Line),
-    Expected = #originator{
+    Expected = #originator_ref{
         customer_id = {string, "f1aa2d75-b597-4ab1-8cca-094bc121da7b"},
-        address     = #address{addr = {string, "Facebook"},
-                               ton  = {integer, 5},
-                               npi  = {integer, 0}},
-        description = {string, "Facebook description"},
-        status      = {string, "approved"},
-        is_default  = {boolean, false}
+        originator = #originator{
+            address = #address{
+                addr = {string, "Facebook"},
+                ton  = {integer, 5},
+                npi  = {integer, 0}
+            },
+            description = {string, "Facebook description"},
+            status      = {string, "approved"},
+            is_default  = {boolean, false}
+        }
     },
     ?assertEqual(Expected, Actual),
 
     Json = csv2json_lib:record_to_json(Actual, ?MODULE),
-    ExpJson = "{\"customer_id\":\"f1aa2d75-b597-4ab1-8cca-094bc121da7b\",\"address\":{\"addr\":\"Facebook\",\"ton\":5,\"npi\":0},\"description\":\"Facebook description\",\"status\":\"approved\",\"is_default\":false}\n",
+    ExpJson = "{\"customer_id\":\"f1aa2d75-b597-4ab1-8cca-094bc121da7b\",\"originator\":{\"address\":{\"addr\":\"Facebook\",\"ton\":5,\"npi\":0},\"description\":\"Facebook description\",\"status\":\"approved\",\"is_default\":false}}\n",
     ?assertEqual(ExpJson, Json).
 
 -endif.

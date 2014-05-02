@@ -10,7 +10,7 @@
 
 -include("user.hrl").
 -include_lib("record_info/include/record_info.hrl").
--export_record_info([user]).
+-export_record_info([user, user_ref]).
 
 %% ===================================================================
 %% API
@@ -53,20 +53,22 @@ parse_line(Line, Key, IVec) ->
     {_AllowAllEmailToSms, Line26} = csv2json_lib:parse_string(Line25),
     {_UserLevelAcceptanceIsUsed, []} = csv2json_lib:parse_string(Line26),
     Decrypt = fun(Text) -> decrypt(Key, IVec, Text) end,
-    #user{
+    #user_ref{
         customer_id = CustomerID,
-        id = Decrypt(Username),
-        password = Password,
-        connection_types = {array, [{string, "mm"}, {string, "soap"}, {string, "oneapi"}]},
-        state = process_blocked(Blocked),
-        mobile_phone = Decrypt(MobilePhone),
-        first_name = Decrypt(FirstName),
-        last_name = Decrypt(LastName),
-        company = Decrypt(Company),
-        occupation = Decrypt(Occupation),
-        email = Decrypt(Email),
-        country = Decrypt(Country),
-        language = Language
+        user = #user{
+            id = Decrypt(Username),
+            password = Password,
+            connection_types = {array, [{string, "mm"}, {string, "soap"}, {string, "oneapi"}]},
+            state = process_blocked(Blocked),
+            mobile_phone = Decrypt(MobilePhone),
+            first_name = Decrypt(FirstName),
+            last_name = Decrypt(LastName),
+            company = Decrypt(Company),
+            occupation = Decrypt(Occupation),
+            email = Decrypt(Email),
+            country = Decrypt(Country),
+            language = Language
+        }
     }.
 
 process_blocked({integer, Status}) ->
@@ -101,25 +103,27 @@ parse_line_test() ->
     Key = [114,185,242,128,80,153,234,171],
     IVec = [122,153,37,54,178,41,143,55],
     Actual = parse_line(Line, Key, IVec),
-    Expected = #user{
-        customer_id      = {string, "0e47952f-22ed-48fe-a975-94a043a6da76"},
-        id               = {string, "name"},
-        password         = {string, "bba6aee5e30c314fb0a4fb916d32491z"},
-        connection_types = {array, [{string, "mm"}, {string, "soap"}, {string, "oneapi"}]},
-        state            = {string, "active"},
-        mobile_phone     = {string, "111223334455"},
-        first_name       = {string, "first name"},
-        last_name        = {string, "last name"},
-        company          = {string, "Company"},
-        occupation       = {string, "IT"},
-        email            = {string, "name@email.com"},
-        country          = {string, "country"},
-        language         = {string, "en"}
+    Expected = #user_ref{
+        customer_id = {string, "0e47952f-22ed-48fe-a975-94a043a6da76"},
+        user = #user{
+            id               = {string, "name"},
+            password         = {string, "bba6aee5e30c314fb0a4fb916d32491z"},
+            connection_types = {array, [{string, "mm"}, {string, "soap"}, {string, "oneapi"}]},
+            state            = {string, "active"},
+            mobile_phone     = {string, "111223334455"},
+            first_name       = {string, "first name"},
+            last_name        = {string, "last name"},
+            company          = {string, "Company"},
+            occupation       = {string, "IT"},
+            email            = {string, "name@email.com"},
+            country          = {string, "country"},
+            language         = {string, "en"}
+        }
     },
     ?assertEqual(Expected, Actual),
 
     Json = csv2json_lib:record_to_json(Actual, ?MODULE),
-    ExpJson = "{\"customer_id\":\"0e47952f-22ed-48fe-a975-94a043a6da76\",\"id\":\"name\",\"password\":\"bba6aee5e30c314fb0a4fb916d32491z\",\"connection_types\":[\"mm\",\"soap\",\"oneapi\"],\"state\":\"active\",\"mobile_phone\":\"111223334455\",\"first_name\":\"first name\",\"last_name\":\"last name\",\"company\":\"Company\",\"occupation\":\"IT\",\"email\":\"name@email.com\",\"country\":\"country\",\"language\":\"en\"}\n",
+    ExpJson = "{\"customer_id\":\"0e47952f-22ed-48fe-a975-94a043a6da76\",\"user\":{\"id\":\"name\",\"password\":\"bba6aee5e30c314fb0a4fb916d32491z\",\"connection_types\":[\"mm\",\"soap\",\"oneapi\"],\"state\":\"active\",\"mobile_phone\":\"111223334455\",\"first_name\":\"first name\",\"last_name\":\"last name\",\"company\":\"Company\",\"occupation\":\"IT\",\"email\":\"name@email.com\",\"country\":\"country\",\"language\":\"en\"}}\n",
     ?assertEqual(ExpJson, Json).
 
 -endif.
