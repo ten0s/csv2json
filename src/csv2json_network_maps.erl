@@ -26,7 +26,7 @@
 %% API
 %% ===================================================================
 
--spec parse_files(string(), string()) -> [string()].
+-spec parse_files(string(), string()) -> {ok, [#network_map{}]}.
 parse_files(MapsFile, MappingsFile) ->
     {ok, Mappings} = parse_mappings_file(MappingsFile),
     %io:format("~p~n", [Mappings]),

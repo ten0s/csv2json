@@ -36,7 +36,7 @@
 %% API
 %% ===================================================================
 
--spec parse_files(string(), string()) -> [string()].
+-spec parse_files(string(), string()) -> {ok, [#network{}]}.
 parse_files(NetworksFile, PrefixesFile) ->
     {ok, Prefixes} = parse_prefixes_file(PrefixesFile),
     %io:format("~p~n", [Prefixes]),
