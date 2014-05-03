@@ -2,6 +2,7 @@
 
 -export([
     parse_file/2,
+    parse_file/3,
     parse_uuid/1,
     parse_integer/1,
     parse_float/1,
@@ -26,13 +27,28 @@
 %% API
 %% ===================================================================
 
--spec parse_file(string(), fun()) -> [string()].
+-spec parse_file(string(), fun()) -> [term()].
 parse_file(Filename, Fun) ->
-    case file:read_file(Filename) of
+    case csv2json_file:read_file(Filename) of
         {ok, Bin} ->
             [_ColumnNames | Lines] = string:tokens(binary_to_list(Bin), ?ROW_DELIM),
             ParsedLines = lists:map(Fun, Lines),
             {ok, ParsedLines};
+        Error ->
+            Error
+    end.
+
+-spec parse_file(string(), fun(), AccIn::term()) -> {[term()], AccOut::term()}.
+parse_file(Filename, Fun2, AccIn) ->
+    case csv2json_file:read_file(Filename) of
+        {ok, Bin} ->
+            [_ColumnNames | Lines] = string:tokens(binary_to_list(Bin), ?ROW_DELIM),
+            FoldFun = fun(Line, {ParsedLines, Acc}) ->
+                {ParsedLine, Acc2} = Fun2(Line, Acc),
+                {[ParsedLine | ParsedLines], Acc2}
+            end,
+            {ParsedLines, AccOut} = lists:foldl(FoldFun, {[], AccIn}, Lines),
+            {ok, {lists:reverse(ParsedLines), AccOut}};
         Error ->
             Error
     end.
@@ -318,6 +334,50 @@ des_encrypt_decrypt_test() ->
     ?assertEqual(T1, des_decrypt(K, V, des_encrypt(K, V, T1))),
     ?assertEqual(T2, des_decrypt(K, V, des_encrypt(K, V, T2))),
     ?assertEqual(T3, des_decrypt(K, V, des_encrypt(K, V, T3))).
+
+parse_file_test_() ->
+    {foreach,
+        fun() -> meck:new(csv2json_file) end,
+        fun(_) -> meck:unload(csv2json_file) end,
+        [{"parse_file Fun/1 test",
+            fun() ->
+                meck:expect(csv2json_file, read_file, fun(_Filename) ->
+                    {ok, <<"#comment line\r\nf11,f12\r\nf21,f22\r\nf31,f32\r\n">>}
+                end),
+                ParseFun = fun(Line) ->
+                    {Field1, Line2} = parse_string(Line),
+                    {Field2,    []} = parse_string(Line2),
+                    {Field1, Field2}
+                end,
+                {ok, ActualLines} = parse_file("dummy.csv", ParseFun),
+                ExpectedLines = [
+                    {{string, "f11"}, {string, "f12"}},
+                    {{string, "f21"}, {string, "f22"}},
+                    {{string, "f31"}, {string, "f32"}}
+                ],
+                ?assertEqual(ExpectedLines, ActualLines)
+            end},
+         {"parse_file Fun/2 test",
+            fun() ->
+                meck:expect(csv2json_file, read_file, fun(_Filename) ->
+                    {ok, <<"#comment line\r\nf11,f12\r\nf21,f22\r\nf31,f32\r\n">>}
+                end),
+                ParseFun2 = fun(Line, Id) ->
+                    {Field1, Line2} = parse_string(Line),
+                    {Field2,    []} = parse_string(Line2),
+                    {{{integer, Id}, Field1, Field2}, Id + 1}
+                end,
+                {ok, {ActualLines, _}} = parse_file("dummy.csv", ParseFun2, 1),
+                ExpectedLines = [
+                    {{integer, 1}, {string, "f11"}, {string, "f12"}},
+                    {{integer, 2}, {string, "f21"}, {string, "f22"}},
+                    {{integer, 3}, {string, "f31"}, {string, "f32"}}
+                ],
+                ?assertEqual(ExpectedLines, ActualLines)
+            end}
+
+        ]
+    }.
 
 -endif.
 
