@@ -251,7 +251,7 @@ set_users_test() ->
         '_id' = {string, "1f2a0fa3-f720-4fb5-8521-b7fbab088e7e"}
     },
     User = #user{
-        user_id = {string, "name"}
+        id = {string, "name"}
     },
     UserRef = #user_ref{
         customer_id = {string, "1f2a0fa3-f720-4fb5-8521-b7fbab088e7e"},
@@ -278,7 +278,7 @@ json_test() ->
         is_default = {boolean, true}
     },
     User = #user{
-        user_id          = {string, "name"},
+        id               = {string, "name"},
         password         = {string, "bba6aee5e30c314fb0a4fb916d32491z"},
         connection_types = {array, [{string, "mm"}, {string, "soap"}, {string, "oneapi"}]},
         state            = {string, "active"},
@@ -313,7 +313,7 @@ json_test() ->
     },
 
     Actual = csv2json_lib:record_to_json(Customer, ?MODULE),
-    Expected = "{\"_id\":\"1f2a0fa3-f720-4fb5-8521-b7fbab088e7e\",\"customer_id\":\"1245\",\"name\":\"STC\",\"priority\":5,\"rps\":10000,\"originators\":[{\"address\":{\"addr\":\"Facebook\",\"ton\":5,\"npi\":0},\"description\":\"Facebook description\",\"state\":\"approved\",\"is_default\":true}],\"network_map_id\":\"93ae08b7-40ed-4fa7-b33e-02dbf59d44ee\",\"default_provider_id\":\"8b80645a-b108-4b54-9cd8-4e70e5d1ce4b\",\"receipts_allowed\":true,\"no_retry\":false,\"default_validity\":\"000003000000000R\",\"max_validity\":259200,\"users\":[{\"user_id\":\"name\",\"password\":\"bba6aee5e30c314fb0a4fb916d32491z\",\"connection_types\":[\"mm\",\"soap\",\"oneapi\"],\"state\":\"active\",\"mobile_phone\":\"111223334455\",\"first_name\":\"first name\",\"last_name\":\"last name\",\"company\":\"Company\",\"occupation\":\"IT\",\"email\":\"name@email.com\",\"country\":\"country\",\"language\":\"en\"}],\"pay_type\":\"postpaid\",\"credit\":-1406470.0,\"credit_limit\":99999999999.0,\"language\":\"en\",\"state\":\"active\"}\n",
+    Expected = "{\"_id\":\"1f2a0fa3-f720-4fb5-8521-b7fbab088e7e\",\"customer_id\":\"1245\",\"name\":\"STC\",\"priority\":5,\"rps\":10000,\"originators\":[{\"address\":{\"addr\":\"Facebook\",\"ton\":5,\"npi\":0},\"description\":\"Facebook description\",\"state\":\"approved\",\"is_default\":true}],\"network_map_id\":\"93ae08b7-40ed-4fa7-b33e-02dbf59d44ee\",\"default_provider_id\":\"8b80645a-b108-4b54-9cd8-4e70e5d1ce4b\",\"receipts_allowed\":true,\"no_retry\":false,\"default_validity\":\"000003000000000R\",\"max_validity\":259200,\"users\":[{\"id\":\"name\",\"password\":\"bba6aee5e30c314fb0a4fb916d32491z\",\"connection_types\":[\"mm\",\"soap\",\"oneapi\"],\"state\":\"active\",\"mobile_phone\":\"111223334455\",\"first_name\":\"first name\",\"last_name\":\"last name\",\"company\":\"Company\",\"occupation\":\"IT\",\"email\":\"name@email.com\",\"country\":\"country\",\"language\":\"en\"}],\"pay_type\":\"postpaid\",\"credit\":-1406470.0,\"credit_limit\":99999999999.0,\"language\":\"en\",\"state\":\"active\"}\n",
     ?assertEqual(Expected, Actual).
 
 -endif.
