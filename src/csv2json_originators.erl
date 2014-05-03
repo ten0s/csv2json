@@ -18,13 +18,14 @@
 
 -spec parse_file(string()) -> {ok, [#originator{}]}.
 parse_file(Filename) ->
-    csv2json_lib:parse_file(Filename, fun parse_line/1).
+    {ok, {Lines, _}} = csv2json_lib:parse_file(Filename, fun parse_line/2, dict:new()),
+    {ok, Lines}.
 
 %% ===================================================================
 %% Internal
 %% ===================================================================
 
-parse_line(Line) ->
+parse_line(Line, Dict) ->
     %io:format("~p~n", [Line]),
     {_ID,           Line2} = csv2json_lib:parse_uuid(Line),
     {CustomerID,    Line3} = csv2json_lib:parse_uuid(Line2),
@@ -40,15 +41,19 @@ parse_line(Line) ->
     {_BypassBlacklist, []} = csv2json_lib:parse_string(Line12),
     Address = process_originator(Originator),
     Status2 = process_status(Status),
-    #originator_ref{
+    Dict2 = dict:update_counter(CustomerID, 1, Dict),
+    Id = dict:fetch(CustomerID, Dict2),
+    OriginatorRef = #originator_ref{
         customer_id = CustomerID,
         originator = #originator{
+            id          = {integer, Id},
             address     = Address,
             description = Description,
             state       = Status2,
             is_default  = IsDefault
         }
-    }.
+    },
+    {OriginatorRef, Dict2}.
 
 process_originator({string, Originator}) ->
     case all_digits(Originator) of
@@ -86,10 +91,11 @@ all_digits_test() ->
 
 parse_line_test() ->
     Line = "\"b9a5c103-cb86-4770-9678-68f6538ab2cb\",\"f1aa2d75-b597-4ab1-8cca-094bc121da7b\",\"Facebook\",\"Facebook description\",\"1\",\"ae3b4951-92ae-41c5-83b0-6f33f1fd57b9\",\"24.10.2007 10:56:56\",\"\",\"\",\"0\",\"0\",\"1\"",
-    Actual = parse_line(Line),
+    {Actual, _} = parse_line(Line, dict:new()),
     Expected = #originator_ref{
         customer_id = {string, "f1aa2d75-b597-4ab1-8cca-094bc121da7b"},
         originator = #originator{
+            id = {integer, 1},
             address = #address{
                 addr = {string, "Facebook"},
                 ton  = {integer, 5},
@@ -103,7 +109,7 @@ parse_line_test() ->
     ?assertEqual(Expected, Actual),
 
     Json = csv2json_lib:record_to_json(Actual, ?MODULE),
-    ExpJson = "{\"customer_id\":\"f1aa2d75-b597-4ab1-8cca-094bc121da7b\",\"originator\":{\"address\":{\"addr\":\"Facebook\",\"ton\":5,\"npi\":0},\"description\":\"Facebook description\",\"state\":\"approved\",\"is_default\":false}}\n",
+    ExpJson = "{\"customer_id\":\"f1aa2d75-b597-4ab1-8cca-094bc121da7b\",\"originator\":{\"id\":1,\"address\":{\"addr\":\"Facebook\",\"ton\":5,\"npi\":0},\"description\":\"Facebook description\",\"state\":\"approved\",\"is_default\":false}}\n",
     ?assertEqual(ExpJson, Json).
 
 -endif.

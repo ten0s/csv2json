@@ -8,6 +8,7 @@
 }).
 
 -record(originator, {
+    id                        :: {integer, integer()},
     address                   :: #address{},
     description               :: {string, string()},
     state                     :: {string, string()},
