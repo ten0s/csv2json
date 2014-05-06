@@ -39,3 +39,8 @@ $ mongoimport --host 127.0.0.1 --port 27017 --db kelly --collection network_maps
 $ ./csv2json customers data/customers.csv data/customers_originators.csv data/customers_users.csv 1,2,3,4,5,6,7,8 1,2,3,4,5,6,7,8 &gt; customers.json
 $ mongoimport --host 127.0.0.1 --port 40001 --db kelly --collection customers --file customers.json -v
 </pre>
+
+<pre>
+$ ./csv2json blacklist data/blacklist.csv &gt; blacklist.json
+$ mongoimport --host 127.0.0.1 --port 27017 --db kelly --collection blacklist --file blacklist.json -v
+</pre>
