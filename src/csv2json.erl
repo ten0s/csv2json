@@ -41,6 +41,11 @@ main(["customers", CustomersFile, OriginatorsFile, UsersFile, Key, IVec]) ->
     Jsons = [csv2json_lib:record_to_json(C, csv2json_customers) || C <- Customers],
     io:format("~s~n", [Jsons]),
     ok;
+main(["blacklist", BlacklistFile]) ->
+    {ok, Entries} = csv2json_blacklist:parse_file(BlacklistFile),
+    Jsons = [csv2json_lib:record_to_json(E, csv2json_blacklist) || E <- Entries],
+    io:format("~s~n", [Jsons]),
+    ok;
 main(_) ->
     usage().
 
@@ -56,7 +61,8 @@ usage() ->
     io:format("Usage: ~s originators <originators file>~n", [BaseName]),
     io:format("Usage: ~s users <users file> <des key> <des ivec>~n", [BaseName]),
     io:format("Usage: ~s customers <customers file>~n", [BaseName]),
-    io:format("Usage: ~s customers <customers file> <originators file> <users file> <des key> <des ivec>~n", [BaseName]).
+    io:format("Usage: ~s customers <customers file> <originators file> <users file> <des key> <des ivec>~n", [BaseName]),
+    io:format("Usage: ~s blacklist <blacklist file>~n", [BaseName]).
 
 string_to_bytes(Str) ->
     [list_to_integer(X) || X <- string:tokens(Str, ",")].

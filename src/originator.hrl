@@ -1,11 +1,7 @@
 -ifndef(originator_hrl).
 -define(originator_hrl, 1).
 
--record(address, {
-    addr                      :: {string, string()},
-    ton                       :: {integer, integer()},
-    npi                       :: {integer, integer()}
-}).
+-include("address.hrl").
 
 -record(originator, {
     id                        :: {integer, integer()},

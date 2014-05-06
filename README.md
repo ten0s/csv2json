@@ -22,6 +22,7 @@ Usage: csv2json originators &lt;originators file&gt;
 Usage: csv2json users &lt;users file&gt; &lt;des key&gt; &lt;ivec&gt;
 Usage: csv2json customers &lt;customers file&gt;
 Usage: csv2json customers &lt;customers file&gt; &lt;originators file&gt; &lt;users file&gt; &lt;des key&gt; &lt;ivec&gt;
+Usage: csv2json blacklist &lt;blacklist file&gt;
 </pre>
 
 <pre>
