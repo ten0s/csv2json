@@ -7,6 +7,11 @@
 %% ===================================================================
 
 -spec main(list()) -> no_return().
+main(["providers", ProvidersFile]) ->
+    {ok, Entries} = csv2json_providers:parse_file(ProvidersFile),
+    Jsons = [csv2json_lib:record_to_json(E, csv2json_providers) || E <- Entries],
+    io:format("~s~n", [Jsons]),
+    ok;
 main(["networks", NetworksFile, PrefixesFile]) ->
     {ok, Networks} = csv2json_networks:parse_files(NetworksFile, PrefixesFile),
     Jsons = [csv2json_lib:record_to_json(N, csv2json_networks) || N <- Networks],
@@ -56,6 +61,7 @@ main(_) ->
 usage() ->
     ScriptName = escript:script_name(),
     BaseName = filename:basename(ScriptName),
+    io:format("Usage: ~s providers <providers file>~n", [BaseName]),
     io:format("Usage: ~s networks <networks file> <prefixes file>~n", [BaseName]),
     io:format("Usage: ~s network_maps <maps file> <maps to networks file>~n", [BaseName]),
     io:format("Usage: ~s originators <originators file>~n", [BaseName]),
