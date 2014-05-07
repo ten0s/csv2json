@@ -80,12 +80,8 @@ parse_float(Str) ->
 -spec parse_boolean(string()) -> {boolean, boolean()}.
 parse_boolean(Str) ->
     %io:format("boolean: ~p~n", [Str]),
-    case parse_string(Str) of
-        {{string, "1"}, Rest} ->
-            {{boolean, true}, Rest};
-        {{string, "0"}, Rest} ->
-            {{boolean, false}, Rest}
-    end.
+    {{string, Value}, Rest} = parse_string(Str),
+    {{boolean, convert_to_boolean(Value)}, Rest}.
 
 -spec parse_string(string()) -> {string, string()}.
 parse_string([]) ->
@@ -192,6 +188,15 @@ convert_to_float(List) ->
             end
     end.
 
+convert_to_boolean("1") ->
+    true;
+convert_to_boolean("True") ->
+    true;
+convert_to_boolean("0") ->
+    false;
+convert_to_boolean("False") ->
+    false.
+
 proplist_to_json(Plist, Module) ->
     proplist_to_json_no_cr(Plist, Module) ++ "\n".
 
@@ -286,7 +291,11 @@ split_field_4_test() ->
     Expected = {"\"0,0000\"", ",\"1\""},
     ?assertEqual(Expected, Actual).
 
-%parse_{string, integer, float, boolean, uuid}_test
+convert_to_boolean_test() ->
+    ?assert(convert_to_boolean("1")),
+    ?assert(convert_to_boolean("True")),
+    ?assertNot(convert_to_boolean("0")),
+    ?assertNot(convert_to_boolean("False")).
 
 -record(outer, {
     filled_string,
