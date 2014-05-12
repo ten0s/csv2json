@@ -5,3 +5,4 @@ data/*
 TAGS
 .eunit/
 rel/csv2json/
+csv2json
